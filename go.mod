@@ -1,4 +1,4 @@
-module gSheets
+module github.com/brimb0r-org/eq
 
 go 1.20
 

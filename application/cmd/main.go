@@ -1,9 +1,9 @@
 package main
 
 import (
-	"gSheets/application/internal/application_container"
-	"gSheets/application/internal/internal_config"
-	"gSheets/application/internal/metadata"
+	"github.com/brimb0r-org/eq/application/internal/application_container"
+	"github.com/brimb0r-org/eq/application/internal/internal_config"
+	"github.com/brimb0r-org/eq/application/internal/metadata"
 	"github.com/brimb0r-org/scheduler/scheduler"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"

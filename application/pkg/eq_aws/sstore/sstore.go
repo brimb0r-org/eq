@@ -2,10 +2,10 @@ package sstore
 
 import (
 	"fmt"
-	"gSheets/application/pkg/eq_aws"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"github.com/aws/aws-sdk-go/service/secretsmanager/secretsmanageriface"
+	"github.com/brimb0r-org/eq/application/pkg/eq_aws"
 )
 
 type SecretStore struct {

@@ -1,10 +1,10 @@
 package eq_aws
 
 import (
-	"gSheets/application/internal/metadata"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/brimb0r-org/eq/application/internal/metadata"
 	"github.com/rs/zerolog/log"
 	"os"
 )

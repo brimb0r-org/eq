@@ -2,8 +2,8 @@ package component_tests
 
 import (
 	"fmt"
-	"gSheets/application/internal/internal_config"
 	"github.com/brimb0r-org/configurator/configurator"
+	"github.com/brimb0r-org/eq/application/internal/internal_config"
 	"os"
 )
 

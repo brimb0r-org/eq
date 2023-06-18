@@ -3,8 +3,8 @@ package internal_excel
 import (
 	"context"
 	"fmt"
-	"gSheets/application/pkg/eq_math"
-	"gSheets/application/pkg/excel"
+	"github.com/brimb0r-org/eq/application/pkg/eq_math"
+	"github.com/brimb0r-org/eq/application/pkg/excel"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/api/sheets/v4"
 	"strconv"

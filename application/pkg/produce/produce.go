@@ -2,7 +2,7 @@ package produce
 
 import (
 	"fmt"
-	"gSheets/application/internal/translator/eq_translator"
+	"github.com/brimb0r-org/eq/application/internal/translator/eq_translator"
 	"os"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"

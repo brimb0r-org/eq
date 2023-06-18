@@ -1,7 +1,7 @@
 package eq_translator
 
 import (
-	"gSheets/application/internal/eq_repo"
+	"github.com/brimb0r-org/eq/application/internal/eq_repo"
 )
 
 type ITranslator interface {
