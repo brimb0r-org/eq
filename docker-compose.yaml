@@ -1,40 +1,6 @@
 version: '3.8'
 
 services:
-
-  downtime:
-    image: "${DOCKER_REGISTRY:-my.registry}/eq:${IMAGE_TAG:-local}"
-    build:
-      context: ./
-      dockerfile: Dockerfile.application
-    environment:
-      - CONFIG_PATH=/
-      - LOCALSTACK_ENDPOINT=http://localstack:4566
-      - LOCALSTACK=true
-    depends_on:
-      tf_core:
-        condition: service_completed_successfully
-    volumes:
-      - ./:/debug
-
-  builder:
-    image: "golang:1.20-buster"
-    environment:
-      - CGO_ENABLED=0
-      - GO_ARGS=${GO_ARGS}
-      - GOBIN=/go/src/github.com/brimb0r/application
-      - GOCACHE=/go/src/github.com/brimb0r/application/.cache
-      - GIT_COMMIT="${GIT_COMMIT:-local}"
-      - COMPONENT_TESTS=true
-    volumes:
-      - ./:/go/src/github.com/brimb0r/application
-      - ./.mod:/go/pkg/mod
-    command:
-      - tail
-      - -f
-      - /dev/null
-    working_dir: /go/src/github.com/brimb0r/application
-
   zookeeper:
     image: "bitnami/zookeeper:latest"
     expose:
@@ -59,6 +25,7 @@ services:
       - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
       - KAFKA_CFG_OFFSETS_REPLICATION_FACTOR=1
       - KAFKA_CFG_CONFLUENT_SCHEMA_REGISTRY_URL=http://karapace-registry:7878
+      - KAFKA_ENABLE_KRAFT=false
 
   karapace-registry:
     image: aivenoy/karapace:latest
