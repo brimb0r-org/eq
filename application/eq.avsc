@@ -1,0 +1,11 @@
+{
+    "type": "record",
+    "namespace": "eq",
+    "name": "eq",
+    "fields": [
+        {"name": "_id", "type": "string"},
+        {"name": "Name", "type": "string"},
+        {"name": "Activity", "type": "string"},
+        {"name": "Publish_status", "type": "string"}
+    ]
+}

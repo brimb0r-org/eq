@@ -1,0 +1,117 @@
+version: '3.8'
+
+services:
+
+  downtime:
+    image: "${DOCKER_REGISTRY:-my.registry}/eq:${IMAGE_TAG:-local}"
+    build:
+      context: ./
+      dockerfile: Dockerfile.application
+    environment:
+      - CONFIG_PATH=/
+      - LOCALSTACK_ENDPOINT=http://localstack:4566
+      - LOCALSTACK=true
+    depends_on:
+      tf_core:
+        condition: service_completed_successfully
+    volumes:
+      - ./:/debug
+
+  builder:
+    image: "golang:1.20-buster"
+    environment:
+      - CGO_ENABLED=0
+      - GO_ARGS=${GO_ARGS}
+      - GOBIN=/go/src/github.com/brimb0r/application
+      - GOCACHE=/go/src/github.com/brimb0r/application/.cache
+      - GIT_COMMIT="${GIT_COMMIT:-local}"
+      - COMPONENT_TESTS=true
+    volumes:
+      - ./:/go/src/github.com/brimb0r/application
+      - ./.mod:/go/pkg/mod
+    command:
+      - tail
+      - -f
+      - /dev/null
+    working_dir: /go/src/github.com/brimb0r/application
+
+  zookeeper:
+    image: "bitnami/zookeeper:latest"
+    expose:
+      - "2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+
+  kafka:
+    image: "bitnami/kafka:latest"
+    expose:
+      - "7777"
+      - "27777"
+    depends_on:
+      - zookeeper
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=CLIENT://:7777,EXTERNAL://:27777
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:7777,EXTERNAL://localhost:27777
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=CLIENT
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_CFG_OFFSETS_REPLICATION_FACTOR=1
+      - KAFKA_CFG_CONFLUENT_SCHEMA_REGISTRY_URL=http://karapace-registry:7878
+
+  karapace-registry:
+    image: aivenoy/karapace:latest
+    entrypoint:
+      - /bin/bash
+      - /opt/karapace/start.sh
+      - registry
+    depends_on:
+      - kafka
+      - mongo-database
+    expose:
+      - "7878"
+    environment:
+      KARAPACE_ADVERTISED_HOSTNAME: karapace-registry
+      KARAPACE_BOOTSTRAP_URI: kafka:7777
+      KARAPACE_PORT: 7878
+      KARAPACE_HOST: 0.0.0.0
+      KARAPACE_CLIENT_ID: karapace
+      KARAPACE_GROUP_ID: karapace-registry
+      KARAPACE_MASTER_ELIGIBITY: "true"
+      KARAPACE_TOPIC_NAME: _schemas
+      KARAPACE_LOG_LEVEL: WARNING
+      KARAPACE_COMPATIBILITY: FULL
+
+  mongo-database:
+    image: mongo:4.4.19
+    working_dir: /jsfiles
+    expose:
+      - "27017"
+
+  localstack:
+    image: localstack/localstack:0.14.5
+    expose:
+      - "4566-4599"
+      - "8080"
+    environment:
+      - SERVICES=iam,lambda,s3,secretsmanager,sqs,ssm,ec2
+      - DEBUG=${DEBUG- }
+      - DATA_DIR=${DATA_DIR- }
+      - SQS_PROVIDER=elasticmq
+      - HOST_TMP_FOLDER=${TMPDIR}
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - "./.temp/localstack:/tmp/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  tf_core:
+    build:
+      context: ./
+      dockerfile: Dockerfile.terraform
+    depends_on:
+      - localstack
+    volumes:
+      - ./terraform/local:/src/terraform

@@ -1,0 +1,8 @@
+FROM debian:buster-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
+
+COPY cmd /cmd
+COPY application/config_files/* /
+
+CMD [ "/cmd" ]

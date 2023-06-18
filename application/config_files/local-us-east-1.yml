@@ -1,0 +1,12 @@
+environment: local
+serviceName: "eq"
+awsRegion: "us-east-1"
+scheduleIntervalSeconds: 20
+excel:
+  apiKey: "{SECRET:local-googleAPIKey}"
+  apiToken: "{SECRET:local-googleAPIToken}"
+mongo:
+  dbName: eq
+  username:
+  password:
+  uri: mongodb://localhost:27017

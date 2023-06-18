@@ -1,0 +1,9 @@
+FROM hashicorp/terraform:1.4.6
+
+RUN mkdir -p /usr/local/share/ca-certificates
+RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+COPY terraform_apply.sh /terraform_apply.sh
+
+ENTRYPOINT [""]
+
+CMD ["/terraform_apply.sh"]
