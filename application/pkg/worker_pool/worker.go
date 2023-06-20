@@ -2,7 +2,7 @@ package worker_pool
 
 import "sync"
 
-var W int = 5
+var W int = 3
 
 var wg sync.WaitGroup
 

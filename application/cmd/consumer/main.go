@@ -83,6 +83,7 @@ func main() {
 				// Process the message received.
 				fmt.Printf("%% Message on %s:\n%s\n",
 					e.TopicPartition, string(e.Value))
+
 				fmt.Printf("run time %v", time.Since(now))
 				if e.Headers != nil {
 					fmt.Printf("%% Headers: %v\n", e.Headers)

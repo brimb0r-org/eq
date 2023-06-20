@@ -15,25 +15,31 @@ type IProduce interface {
 }
 
 type Produce struct {
-	translator *eq_translator.EqTranslator
-	Producer   *kafka.Producer
+	Producer *kafka.Producer
 }
 
-func (p *Produce) Produce(incoming <-chan eq_translator.ITranslator) error {
-	var err error
-	if len(os.Args) != 2 {
-		fmt.Fprintf(os.Stderr, "Usage: %s <bootstrap-servers> <topic>\n",
-			os.Args[0])
-		os.Exit(1)
-	}
+func NewProducer() IProduce {
+	// https://github.com/confluentinc/librdkafka/blob/master/CONFIGURATION.md
+	p, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": "localhost:27777"})
 
-	topic := os.Args[1]
-	totalMsgcnt := len(incoming)
-	fmt.Printf("incoming %v", totalMsgcnt)
 	if err != nil {
 		fmt.Printf("Failed to create producer: %s\n", err)
 		os.Exit(1)
 	}
+
+	fmt.Printf("Created Producer %v\n", p)
+
+	buildProducerService := &Produce{
+		Producer: p,
+	}
+
+	return buildProducerService
+}
+
+func (p *Produce) Produce(incoming <-chan eq_translator.ITranslator) error {
+	var err error
+	totalMsgcnt := len(incoming)
+	fmt.Printf("incoming %v", totalMsgcnt)
 
 	eventWorker := worker_pool.Worker(func(i interface{}) {})
 	for i := 0; i < totalMsgcnt; i++ {
@@ -41,22 +47,9 @@ func (p *Produce) Produce(incoming <-chan eq_translator.ITranslator) error {
 	}
 
 	for t := range incoming {
-		value := fmt.Sprintf("Producer , message #%v", t)
-
-		err = p.Producer.Produce(&kafka.Message{
-			TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
-			Value:          []byte(value),
-			Headers:        []kafka.Header{{Key: "myTestHeader", Value: []byte("header values are binary")}},
-		}, nil)
-
+		err = p.produceOne(t, err)
 		if err != nil {
-			if err.(kafka.Error).Code() == kafka.ErrQueueFull {
-				// Producer queue is full, wait 1s for messages
-				// to be delivered then try again.
-				time.Sleep(time.Second)
-				continue
-			}
-			fmt.Printf("Failed to produce message: %v\n", err)
+			return err
 		}
 	}
 
@@ -65,6 +58,26 @@ func (p *Produce) Produce(incoming <-chan eq_translator.ITranslator) error {
 		fmt.Print("Still waiting to flush outstanding messages\n")
 	}
 	close(eventWorker)
+	return err
+}
+
+func (p *Produce) produceOne(t eq_translator.ITranslator, err error) error {
+	err = p.Producer.Produce(t.Translate(), nil)
+
+	if err != nil {
+		if err.(kafka.Error).Code() == kafka.ErrQueueFull {
+			// Producer queue is full, wait 1s for messages
+			// to be delivered then try again.
+			time.Sleep(time.Second)
+			return err.(kafka.Error)
+		}
+		fmt.Printf("Failed to produce message: %v\n", err)
+		return err
+	}
+	err = t.SendSuccessCallbackPublished()
+	if err != nil {
+		return err
+	}
 	return err
 }
 
@@ -99,22 +112,4 @@ func (p *Produce) events() error {
 		}
 	}()
 	return nil
-}
-
-func NewProducer() IProduce {
-	// https://github.com/confluentinc/librdkafka/blob/master/CONFIGURATION.md
-	p, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": "localhost:27777"})
-
-	if err != nil {
-		fmt.Printf("Failed to create producer: %s\n", err)
-		os.Exit(1)
-	}
-
-	fmt.Printf("Created Producer %v\n", p)
-
-	buildProducerService := &Produce{
-		Producer: p,
-	}
-
-	return buildProducerService
 }

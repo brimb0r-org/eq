@@ -1,5 +1,5 @@
 db.eq.remove({})
-for (let i = 0; i < 1000000; i++) {
+for (let i = 0; i < 1000; i++) {
     db.eq.insert({
         "_id": "5d8a342ba9e109cb56" + i,
         "Name": "Eq",

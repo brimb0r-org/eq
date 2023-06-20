@@ -17,3 +17,4 @@ export CONFIG_PATH="../../../application/config_files/"
 -  docker-compose -f docker-compose.application.yaml -p app exec -T builder bash -c 'go build -buildvcs=false -gcflags="-l" ./application/cmd'
 -  docker-compose -f docker-compose.application.yaml -p app push
 -  docker-compose -f docker-compose.application.yaml -p app down
+-  docker-compose -f docker-compose.override.yaml -f docker-compose.yaml -p testing down

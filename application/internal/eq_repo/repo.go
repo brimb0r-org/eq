@@ -13,6 +13,7 @@ const EqCollection = "eq"
 type IEqRepo interface {
 	QueryEq(ctx context.Context) ([]*Eq, error)
 	UpdateEqPublished(eq *Eq) error
+	UpdateEqConsumed(eq *Eq) error
 }
 
 type Repo struct {
@@ -63,6 +64,20 @@ func (r *Repo) UpdateEqPublished(eq *Eq) error {
 		bson.D{{"_id", eq.ID}},
 		bson.D{{"$set",
 			bson.D{{"Publish_status", true}},
+		}},
+	)
+	if err != nil {
+		return fmt.Errorf("[%s] not updated in mongo: %w", eq.ID, err)
+	}
+	return nil
+}
+
+func (r *Repo) UpdateEqConsumed(eq *Eq) error {
+	_, err := r.Collection(EqCollection).UpdateOne(
+		context.Background(),
+		bson.D{{"_id", eq.ID}},
+		bson.D{{"$set",
+			bson.D{{"Consumed_status", true}},
 		}},
 	)
 	if err != nil {
