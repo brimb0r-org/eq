@@ -8,6 +8,7 @@ require (
 	github.com/brimb0r-org/configurator v0.0.0-20230617182517-3b5c863f71f1
 	github.com/brimb0r-org/scheduler v0.0.0-20230617164740-d9540f88e81c
 	github.com/confluentinc/confluent-kafka-go v1.9.2
+	github.com/confluentinc/confluent-kafka-go/v2 v2.1.1
 	github.com/rs/zerolog v1.29.1
 	github.com/stretchr/testify v1.8.4
 	go.mongodb.org/mongo-driver v1.11.7
@@ -27,11 +28,11 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.4 // indirect
 	github.com/googleapis/gax-go/v2 v2.10.0 // indirect
-	github.com/heetch/avro v0.3.1 // indirect
+	github.com/heetch/avro v0.4.4 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
-	github.com/klauspost/compress v1.13.6 // indirect
+	github.com/klauspost/compress v1.15.9 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
-	github.com/mattn/go-isatty v0.0.14 // indirect
+	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect

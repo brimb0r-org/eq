@@ -8,27 +8,27 @@ import (
 	"github.com/brimb0r-org/eq/application/internal/translator/eq_translator"
 	"github.com/brimb0r-org/eq/application/pkg/excel"
 	"github.com/brimb0r-org/eq/application/pkg/produce"
-	"github.com/brimb0r-org/eq/application/pkg/worker_pool"
 	"github.com/brimb0r-org/scheduler/scheduler"
 	"github.com/rs/zerolog/log"
 	"time"
 )
 
 type runner struct {
-	srv     *excel.ExcelConfig
-	eqRepo  eq_repo.IEqRepo
-	produce produce.IProduce
+	excelsrv   *excel.ExcelConfig
+	eqRepo     eq_repo.IEqRepo
+	producesrv produce.IProduce
 }
 
 func BuildJob(c *internal_config.Configuration) scheduler.Job {
-	srv := &excel.ExcelConfig{
+	excelsrv := &excel.ExcelConfig{
 		Apikey:      c.Excel.Apikey,
 		AccessToken: c.Excel.AccessToken,
 	}
+	producer := produce.NewProducer()
 	return &runner{
-		srv:     srv,
-		eqRepo:  &eq_repo.Repo{Database: c.Mongo.MongoDatabase()},
-		produce: &produce.Produce{},
+		excelsrv:   excelsrv,
+		eqRepo:     &eq_repo.Repo{Database: c.Mongo.MongoDatabase()},
+		producesrv: producer,
 	}
 }
 
@@ -36,7 +36,7 @@ func (app runner) Run() error {
 	log.Print("begin")
 	begin := time.Now()
 
-	statusReport, err := internal_excel.GetDataToProcess(app.srv)
+	statusReport, err := internal_excel.GetDataToProcess(app.excelsrv)
 	if err != nil {
 		log.Print(err)
 	}
@@ -53,14 +53,7 @@ func (app runner) Run() error {
 	}
 
 	close(eqChan)
-
-	work := worker_pool.Worker(func(i interface{}) {
-		err = app.produce.Produce(i.(chan eq_translator.ITranslator))
-	})
-	for i := 0; i < len(eqChan); i++ {
-		work <- eqChan
-	}
-	close(work)
+	err = app.producesrv.Produce(eqChan)
 
 	log.Print(time.Since(begin))
 	return err

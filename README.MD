@@ -8,7 +8,7 @@
 export LOCALSTACK="true"
 export LOCALSTACK_ENDPOINT="http://localhost:4566"
 export AWS_REGION="us-east-1"
-export CONFIG_PATH="../../application/config_files/"
+export CONFIG_PATH="../../../application/config_files/"
 ```
 ## Build and test on local and in ci pipeline with compose ( to build and push artifacts ) [ CI steps to be done in jenkins and push artifacts ]
 -  prereq = docker volume create --name=mongodata ( only need to generate once )

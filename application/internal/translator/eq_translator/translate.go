@@ -18,4 +18,5 @@ func (t *EqTranslator) SendSuccessCallback() error {
 	return t.Repo.UpdateEqPublished(t.Eq)
 }
 
-func (t *EqTranslator) Translate() {}
+func (t *EqTranslator) Translate() {
+}
